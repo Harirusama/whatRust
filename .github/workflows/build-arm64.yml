@@ -1,0 +1,38 @@
+name: Build whatRust Windows ARM64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-arm64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust & ARM64 Target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-pc-windows-msvc
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build ARM64 Binary
+        run: npx @tauri-apps/cli build --target aarch64-pc-windows-msvc
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatRust-ARM64-Windows
+          path: |
+            src-tauri/target/aarch64-pc-windows-msvc/release/bundle/nsis/*.exe
+            src-tauri/target/aarch64-pc-windows-msvc/release/bundle/msi/*.msi
+            src-tauri/target/aarch64-pc-windows-msvc/release/*.exe
+          if-no-files-found: warn

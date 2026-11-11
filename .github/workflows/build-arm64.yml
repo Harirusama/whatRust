@@ -11,12 +11,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Setup MSVC ARM64 Environment
+      - name: Setup MSVC ARM64 Cross-Compiler
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64_arm64
@@ -26,18 +21,20 @@ jobs:
         with:
           targets: aarch64-pc-windows-msvc
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build ARM64 Binary
-        run: npx @tauri-apps/cli build --target aarch64-pc-windows-msvc
+      - name: Build Native ARM64 Binary
+        shell: pwsh
+        run: |
+          if (Test-Path "src-tauri/Cargo.toml") {
+            cargo build --release --target aarch64-pc-windows-msvc --manifest-path src-tauri/Cargo.toml
+          } else {
+            cargo build --release --target aarch64-pc-windows-msvc
+          }
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: whatRust-ARM64-Windows
           path: |
-            src-tauri/target/aarch64-pc-windows-msvc/release/bundle/nsis/*.exe
-            src-tauri/target/aarch64-pc-windows-msvc/release/bundle/msi/*.msi
+            target/aarch64-pc-windows-msvc/release/*.exe
             src-tauri/target/aarch64-pc-windows-msvc/release/*.exe
-          if-no-files-found: warn
+          if-no-files-found: error

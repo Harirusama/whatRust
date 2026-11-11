@@ -14,7 +14,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Setup MSVC ARM64 Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64_arm64
 
       - name: Setup Rust & ARM64 Target
         uses: dtolnay/rust-toolchain@stable
